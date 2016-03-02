@@ -6,6 +6,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
+import java.util.Stack;
 
 import javax.swing.JPanel;
 
@@ -13,6 +16,8 @@ public class Canvas extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 
+	private Stack<BufferedImage> undo;
+	private Stack<BufferedImage> redo;
 	private BufferedImage buffer;
 	private Tool tool;
 	private Color color;
@@ -21,6 +26,10 @@ public class Canvas extends JPanel {
 
 		this.tool = new PencilTool(color);
 		this.buffer = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB);
+		
+		undo = new Stack<BufferedImage>();
+		redo = new Stack<BufferedImage>();
+		undo.push(copyBuffer());
 		
 		this.addMouseListener(new MouseListener() {
 
@@ -66,6 +75,15 @@ public class Canvas extends JPanel {
 	}
 
 
+	private BufferedImage copyBuffer() {
+		ColorModel model = buffer.getColorModel();
+		boolean isAlphaPremultiplied = model.isAlphaPremultiplied();
+		WritableRaster raster = buffer.copyData(null);
+		BufferedImage copyImage = new BufferedImage(model, raster, isAlphaPremultiplied, null);
+		return copyImage;
+	}
+
+
 	public void setBuffer(BufferedImage buffer) {
 		this.buffer = buffer;
 	}
@@ -89,6 +107,24 @@ public class Canvas extends JPanel {
 		g.drawImage(buffer, 0, 0, null);
 		tool.drawPreview(g);
 
+	}
+	
+	public void undo() {
+		if (!undo.isEmpty()) {
+			if (!undo.isEmpty() && undo.size() != 1) {
+				redo.push(copyBuffer());
+			}
+			BufferedImage undoImage = undo.pop();
+			this.setBuffer(undoImage);
+		}
+	}
+
+	public void redo() {
+		if (!redo.isEmpty()) {
+			undo.push(copyBuffer());
+			BufferedImage redoImage = redo.pop();
+			this.setBuffer(redoImage);
+		}
 	}
 
 }

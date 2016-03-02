@@ -3,7 +3,6 @@ package golub.mco364.paint;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -26,6 +25,8 @@ public class PaintFrame extends JFrame implements ActionListener{
 	private JButton rectangle;
 	private JButton bucket;
 	private JButton line;
+	private JButton undo;
+	private JButton redo;
 	
 	private JPanel buttons;
 	private JPanel topPanel;
@@ -50,38 +51,45 @@ public class PaintFrame extends JFrame implements ActionListener{
 		rectangle = new JButton("rectangle");
 		oval = new JButton("oval");
 		bucket = new JButton ("fill-bucket");
+		undo = new JButton("undo");
+		redo = new JButton("redo");
 		
 		pencil.addActionListener(this);
 		line.addActionListener(this);
 		rectangle.addActionListener(this);
 		oval.addActionListener(this);
 		bucket.addActionListener(this);
+		undo.addActionListener(this);
+		redo.addActionListener(this);
 		
 		
 		buttons = new JPanel(new BorderLayout());
-		buttonTop = new JPanel(new BorderLayout());
-		buttonBottom = new JPanel(new BorderLayout());
-		buttonTop.add(pencil, BorderLayout.WEST);
-		buttonTop.add(line, BorderLayout.CENTER);
-		buttonTop.add(rectangle, BorderLayout.EAST);
-		buttonBottom.add(oval, BorderLayout.WEST);
-		buttonBottom.add(bucket, BorderLayout.EAST);
+		buttonTop = new JPanel();
+		buttonBottom = new JPanel();
+		buttonTop.add(pencil);
+		buttonTop.add(line);
+		buttonTop.add(rectangle);
+		buttonBottom.add(oval);
+		buttonBottom.add(bucket);
+		buttonBottom.add(undo);
+		buttonBottom.add(redo);
+		
 		
 		buttons.add(buttonTop, BorderLayout.NORTH);
 		buttons.add(buttonBottom, BorderLayout.SOUTH);
 		
 
-		JColorChooser cc = new JColorChooser();
+		JColorChooser jcc = new JColorChooser();
 
-		AbstractColorChooserPanel[] panels = cc.getChooserPanels();
+		AbstractColorChooserPanel[] panels = jcc.getChooserPanels();
 
 		for (AbstractColorChooserPanel p : panels) {
 			if (!p.getDisplayName().equals("Swatches")) {
-				cc.removeChooserPanel(p);
+				jcc.removeChooserPanel(p);
 			}
 		}
-		cc.setPreviewPanel(new JPanel());
-		final ColorSelectionModel model = cc.getSelectionModel();
+		jcc.setPreviewPanel(new JPanel());
+		final ColorSelectionModel model = jcc.getSelectionModel();
 		ChangeListener changeListener = new ChangeListener() {
 			public void stateChanged(ChangeEvent c) {
 				setColor(model.getSelectedColor());
@@ -127,12 +135,12 @@ public class PaintFrame extends JFrame implements ActionListener{
 		if (event.getSource() == bucket) {
 			canvas.setTool(new BucketTool(canvas.getBuffer(), this.color));
 		}
-		/*if (event.getSource() == undo) {
+		if (event.getSource() == undo) {
 			canvas.undo();
 		}
-		if (e.getSource() == redo) {
+		if (event.getSource() == redo) {
 			canvas.redo();
-		}*/
+		}
 		
 	}
 
