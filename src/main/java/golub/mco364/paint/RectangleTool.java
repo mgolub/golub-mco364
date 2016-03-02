@@ -9,6 +9,11 @@ public class RectangleTool implements Tool{
 	private int y1;
 	private int x2;
 	private int y2;
+	private Color color;
+	
+	public RectangleTool(Color color){
+		this.color = color;
+	}
 
 	public void mousePressed(Graphics g, int x, int y) {
 		
@@ -20,8 +25,19 @@ public class RectangleTool implements Tool{
 
 	public void mouseReleased(Graphics g, int x, int y) {
 		
-		g.setColor(Color.RED);
-		g.drawRect(this.x1, this.y1, x, y);
+		g.setColor(color);
+		if (x1 > x2 && y1 > y2) {
+			g.drawRect(x2, y2, x1 - x2, y1 - y2);
+		}
+		if (x2 > x1 && y1 > y2) {
+			g.drawRect(x1, y2, x2 - x1, y1 - y2);
+		}
+		if (x1 > x2 && y2 > y1) {
+			g.drawRect(x2, y1, x1 - x2, y2 - y1);
+		}
+		if (x2 > x1 && y2 > y1) {
+			g.drawRect(x1, y1, x2 - x1, y2 - y1);
+		}
 	}
 
 	public void mouseDragged(Graphics g, int x, int y) {
@@ -32,8 +48,19 @@ public class RectangleTool implements Tool{
 
 	public void drawPreview(Graphics g) {
 		
-		g.setColor(Color.RED);
-		g.drawRect(this.x1, this.y1, this.x2, this.y2);
+		g.setColor(color);
+		if (x1 > x2 && y1 > y2) {
+			g.drawRect(x2, y2, x1 - x2, y1 - y2);
+		}
+		if (x2 > x1 && y1 > y2) {
+			g.drawRect(x1, y2, x2 - x1, y1 - y2);
+		}
+		if (x1 > x2 && y2 > y1) {
+			g.drawRect(x2, y1, x1 - x2, y2 - y1);
+		}
+		if (x2 > x1 && y2 > y1) {
+			g.drawRect(x1, y1, x2 - x1, y2 - y1);
+		}
 		
 	}
 

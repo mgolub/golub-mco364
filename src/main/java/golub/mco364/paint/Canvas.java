@@ -1,5 +1,6 @@
 package golub.mco364.paint;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -14,12 +15,13 @@ public class Canvas extends JPanel {
 
 	private BufferedImage buffer;
 	private Tool tool;
+	private Color color;
 
-	public Canvas() {
+	public Canvas(Color color) {
 
+		this.tool = new PencilTool(color);
 		this.buffer = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB);
-		this.tool = new RectangleTool();
-
+		
 		this.addMouseListener(new MouseListener() {
 
 			public void mouseClicked(MouseEvent event) {
@@ -61,6 +63,23 @@ public class Canvas extends JPanel {
 			}
 
 		});
+	}
+
+
+	public void setBuffer(BufferedImage buffer) {
+		this.buffer = buffer;
+	}
+
+	public BufferedImage getBuffer() {
+		return buffer;
+	}
+
+	public void setTool(Tool tool) {
+		this.tool = tool;
+	}
+
+	public void setColor(Color color) {
+		this.color = color;
 	}
 
 	@Override

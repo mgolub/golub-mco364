@@ -9,6 +9,11 @@ public class LineTool implements Tool{
 	private int y1;
 	private int x2;
 	private int y2;
+	private Color color;
+	
+	public LineTool(Color color){
+		this.color = color;
+	}
 
 	public void mousePressed(Graphics g, int x, int y) {
 		
@@ -20,7 +25,7 @@ public class LineTool implements Tool{
 
 	public void mouseReleased(Graphics g, int x, int y) {
 		
-		g.setColor(Color.RED);
+		g.setColor(color);
 		g.drawLine(this.x1, this.y1, x, y);
 	}
 
@@ -32,9 +37,13 @@ public class LineTool implements Tool{
 
 	public void drawPreview(Graphics g) {
 		
-		g.setColor(Color.RED);
+		g.setColor(color);
 		g.drawLine(this.x1, this.y1, this.x2, this.y2);
 		
+	}
+
+	public void setColor(Color color) {
+		this.color = color;
 	}
 
 }
