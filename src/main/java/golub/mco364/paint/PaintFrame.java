@@ -97,9 +97,9 @@ public class PaintFrame extends JFrame implements ActionListener{
 		};
 		model.addChangeListener(changeListener);
 		
-		canvas = new Canvas(Color.BLACK);
+		canvas = new Canvas();
 		topPanel = new JPanel(new BorderLayout());
-		topPanel.add(cc, BorderLayout.EAST);
+		topPanel.add(jcc, BorderLayout.EAST);
 		topPanel.add(buttons, BorderLayout.CENTER);
 		container.add(topPanel, BorderLayout.NORTH);
 		container.add(canvas, BorderLayout.CENTER);
@@ -121,19 +121,19 @@ public class PaintFrame extends JFrame implements ActionListener{
 	public void actionPerformed(ActionEvent event) {
 		// TODO Auto-generated method stub
 		if (event.getSource() == pencil) {
-			canvas.setTool(new PencilTool(this.color));
+			canvas.setTool(new PencilTool());
 		}
 		if (event.getSource() == line) {
-			canvas.setTool(new LineTool(this.color));
+			canvas.setTool(new LineTool());
 		}
 		if (event.getSource() == rectangle) {
-			canvas.setTool(new RectangleTool(this.color));
+			canvas.setTool(new RectangleTool());
 		}
 		if (event.getSource() == oval) {
-			canvas.setTool(new OvalTool(this.color));
+			canvas.setTool(new OvalTool());
 		}
 		if (event.getSource() == bucket) {
-			canvas.setTool(new BucketTool(canvas.getBuffer(), this.color));
+			canvas.setTool(new BucketTool(canvas.getImage()));
 		}
 		if (event.getSource() == undo) {
 			canvas.undo();

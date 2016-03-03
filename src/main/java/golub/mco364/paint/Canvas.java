@@ -22,14 +22,15 @@ public class Canvas extends JPanel {
 	private Tool tool;
 	private Color color;
 
-	public Canvas(Color color) {
+	public Canvas() {
 
-		this.tool = new PencilTool(color);
+		this.tool = new PencilTool();
 		this.buffer = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB);
+		this.color = Color.BLACK;
 		
 		undo = new Stack<BufferedImage>();
 		redo = new Stack<BufferedImage>();
-		undo.push(copyBuffer());
+		undo.push(copyBuffer(buffer));
 		
 		this.addMouseListener(new MouseListener() {
 
@@ -46,13 +47,14 @@ public class Canvas extends JPanel {
 			}
 
 			public void mousePressed(MouseEvent event) {
-				tool.mousePressed(buffer.getGraphics(), event.getX(), event.getY());
+				undo.push(copyBuffer(buffer));
+				tool.mousePressed(buffer.getGraphics(), event.getX(), event.getY(), buffer, color);
 				repaint();
 
 			}
 
 			public void mouseReleased(MouseEvent event) {
-				tool.mouseReleased(buffer.getGraphics(), event.getX(), event.getY());
+				tool.mouseReleased(buffer.getGraphics(), event.getX(), event.getY(), color);
 				repaint();
 
 			}
@@ -63,7 +65,7 @@ public class Canvas extends JPanel {
 
 			public void mouseDragged(MouseEvent event) {
 
-				tool.mouseDragged(buffer.getGraphics(), event.getX(), event.getY());
+				tool.mouseDragged(buffer.getGraphics(), event.getX(), event.getY(), color);
 				repaint();
 			}
 
@@ -75,22 +77,15 @@ public class Canvas extends JPanel {
 	}
 
 
-	private BufferedImage copyBuffer() {
-		ColorModel model = buffer.getColorModel();
-		boolean isAlphaPremultiplied = model.isAlphaPremultiplied();
-		WritableRaster raster = buffer.copyData(null);
-		BufferedImage copyImage = new BufferedImage(model, raster, isAlphaPremultiplied, null);
-		return copyImage;
+	private BufferedImage copyBuffer(BufferedImage image) {
+		BufferedImage b = new BufferedImage(image.getWidth(),
+				image.getHeight(), image.getType());
+		Graphics g = b.getGraphics();
+		g.drawImage(image, 0, 0, null);
+		g.dispose();
+		return b;
 	}
 
-
-	public void setBuffer(BufferedImage buffer) {
-		this.buffer = buffer;
-	}
-
-	public BufferedImage getBuffer() {
-		return buffer;
-	}
 
 	public void setTool(Tool tool) {
 		this.tool = tool;
@@ -99,32 +94,35 @@ public class Canvas extends JPanel {
 	public void setColor(Color color) {
 		this.color = color;
 	}
+	
+	public BufferedImage getImage() {
+		return buffer;
+	}
 
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
 		g.drawImage(buffer, 0, 0, null);
-		tool.drawPreview(g);
+		tool.drawPreview(g, color);
 
 	}
 	
 	public void undo() {
 		if (!undo.isEmpty()) {
-			if (!undo.isEmpty() && undo.size() != 1) {
-				redo.push(copyBuffer());
-			}
-			BufferedImage undoImage = undo.pop();
-			this.setBuffer(undoImage);
+			BufferedImage buffer = undo.pop();
+			this.buffer = buffer;
+			redo.add(this.buffer);
+
 		}
+		repaint();
 	}
 
 	public void redo() {
 		if (!redo.isEmpty()) {
-			undo.push(copyBuffer());
-			BufferedImage redoImage = redo.pop();
-			this.setBuffer(redoImage);
+			buffer = redo.pop();
 		}
+		repaint();
 	}
 
 }

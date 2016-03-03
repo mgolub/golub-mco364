@@ -10,29 +10,29 @@ import java.util.Queue;
 public class BucketTool implements Tool{
 	
 	private BufferedImage image;
-	private Color color;
-	
-	public BucketTool(BufferedImage image, Color color){
-		this.image = image;
-		this.color = color;
-	}
 
-	public void mousePressed(Graphics g, int x, int y) {
+	public BucketTool(BufferedImage image){
+		this.image = image;
+	}
+	
+
+
+	public void mousePressed(Graphics g, int x, int y, BufferedImage buffer, Color color) {
 		int spot = image.getRGB(x, y);
-		if (spot != this.color.getRGB()){
-			fillIn(x,y, image.getRGB(x,y), this.color);
+		if (spot != color.getRGB()){
+			fillIn(x,y, image.getRGB(x,y), color);
 		}
 	}
 
-	public void mouseReleased(Graphics g, int x, int y) {
+	public void mouseReleased(Graphics g, int x, int y, Color color) {
 		
 	}
 
-	public void mouseDragged(Graphics g, int x, int y) {
+	public void mouseDragged(Graphics g, int x, int y, Color color) {
 		
 	}
 
-	public void drawPreview(Graphics g) {
+	public void drawPreview(Graphics g, Color color) {
 		
 	}
 	
@@ -60,8 +60,6 @@ public class BucketTool implements Tool{
 		points.add(new Point(x,y));
 	}
 
-	public void setColor(Color color) {
-		this.color = color;
-	}
+	
 
 }
