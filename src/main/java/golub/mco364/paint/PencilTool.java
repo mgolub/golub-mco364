@@ -4,43 +4,39 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
-public class PencilTool implements Tool{
-	
+public class PencilTool extends Tool {
+
 	private int x;
 	private int y;
-	
-	
-	public void mousePressed(Graphics g, int x, int y, BufferedImage buffer, Color color) {
-		g.setColor(color);
-		g.fillOval(x,y,1,1);
+
+	public PencilTool(PaintProperties properties) {
+		super(properties);
+	}
+
+	public void mousePressed(Graphics g, int x, int y) {
 		this.x = x;
 		this.y = y;
-		
+		g.setColor(properties.getColor());
+		g.fillOval(x, y, 1, 1);
+
 	}
 
-	public void mouseReleased(Graphics g, int x, int y, Color color) {
+	public void mouseReleased(Graphics g, int x, int y) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
-	public void mouseDragged(Graphics g, int x, int y, Color color) {
-	
-		g.setColor(color);
+	public void mouseDragged(Graphics g, int x, int y) {
+		g.setColor(properties.getColor());
 		g.drawLine(this.x, this.y, x, y);
+
 		this.x = x;
 		this.y = y;
-		
 	}
 
-	public void drawPreview(Graphics g, Color color) {
+	public void drawPreview(Graphics g) {
 		// TODO Auto-generated method stub
-		
+
 	}
-
-
-
-
-	
-	
 
 }

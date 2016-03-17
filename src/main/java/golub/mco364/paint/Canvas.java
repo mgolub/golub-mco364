@@ -2,6 +2,7 @@ package golub.mco364.paint;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -16,45 +17,47 @@ public class Canvas extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 
-	private Stack<BufferedImage> undo;
-	private Stack<BufferedImage> redo;
 	private BufferedImage buffer;
 	private Tool tool;
 	private Color color;
-
-	public Canvas() {
-
-		this.tool = new PencilTool();
-		this.buffer = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB);
-		this.color = Color.BLACK;
+	private Stack<BufferedImage> undo;
+	private Stack<BufferedImage> redo;
+	private PaintProperties properties;
+	
+	public Canvas(final BufferedImage buffer) {
 		
+
+		this.buffer = buffer;
+
+		color = Color.BLACK; //default
 		undo = new Stack<BufferedImage>();
 		redo = new Stack<BufferedImage>();
-		undo.push(copyBuffer(buffer));
+		properties = new PaintProperties(800,800, buffer);
+		this.tool = new PencilTool(properties);
 		
+		
+
 		this.addMouseListener(new MouseListener() {
 
-			public void mouseClicked(MouseEvent event) {
+			public void mouseClicked(MouseEvent e) {}
 
-			}
+			public void mouseEntered(MouseEvent e) {}
 
-			public void mouseEntered(MouseEvent event) {
+			public void mouseExited(MouseEvent e) {}
 
-			}
-
-			public void mouseExited(MouseEvent event) {
-
-			}
-
-			public void mousePressed(MouseEvent event) {
+			public void mousePressed(MouseEvent e) {
 				undo.push(copyBuffer(buffer));
-				tool.mousePressed(buffer.getGraphics(), event.getX(), event.getY(), buffer, color);
+
+				tool.mousePressed(buffer.getGraphics(), e.getX(),
+						e.getY());
 				repaint();
 
 			}
 
-			public void mouseReleased(MouseEvent event) {
-				tool.mouseReleased(buffer.getGraphics(), event.getX(), event.getY(), color);
+			public void mouseReleased(MouseEvent e) {
+				redo.push(copyBuffer(buffer));
+				tool.mouseReleased(buffer.getGraphics(), e.getX(),
+						e.getY());
 				repaint();
 
 			}
@@ -62,67 +65,70 @@ public class Canvas extends JPanel {
 		});
 
 		this.addMouseMotionListener(new MouseMotionListener() {
+			
+			public void mouseDragged(MouseEvent e) {
+			    
 
-			public void mouseDragged(MouseEvent event) {
-
-				tool.mouseDragged(buffer.getGraphics(), event.getX(), event.getY(), color);
+				tool.mouseDragged(buffer.getGraphics(), e.getX(),
+						e.getY());
 				repaint();
+				
 			}
 
-			public void mouseMoved(MouseEvent event) {
-
+			public void mouseMoved(MouseEvent e) {
 			}
-
 		});
-	}
-
-
-	private BufferedImage copyBuffer(BufferedImage image) {
-		BufferedImage b = new BufferedImage(image.getWidth(),
-				image.getHeight(), image.getType());
-		Graphics g = b.getGraphics();
-		g.drawImage(image, 0, 0, null);
-		g.dispose();
-		return b;
-	}
-
-
-	public void setTool(Tool tool) {
-		this.tool = tool;
-	}
-
-	public void setColor(Color color) {
-		this.color = color;
-	}
-	
-	public BufferedImage getImage() {
-		return buffer;
 	}
 
 	@Override
 	protected void paintComponent(Graphics g) {
-		super.paintComponent(g);
 
+		super.paintComponent(g);
 		g.drawImage(buffer, 0, 0, null);
-		tool.drawPreview(g, color);
+		tool.drawPreview(g);
+
 
 	}
 	
-	public void undo() {
-		if (!undo.isEmpty()) {
-			BufferedImage buffer = undo.pop();
-			this.buffer = buffer;
-			redo.add(this.buffer);
-
-		}
-		repaint();
+	public void setTool(Tool tool){
+		
+		this.tool = tool;
 	}
-
-	public void redo() {
-		if (!redo.isEmpty()) {
+	
+	public void setColor(Color c){
+		this.color = c;
+	}
+	
+	public BufferedImage copyBuffer(BufferedImage buffer){
+		
+		BufferedImage newBuffer = new BufferedImage(buffer.getWidth(), buffer.getHeight(), buffer.getType());
+		
+		Graphics2D g2 = newBuffer.createGraphics();
+		g2.drawImage(buffer,0,0,null);
+		
+		return newBuffer;
+	}
+	
+	public void undo(){
+		if(!undo.isEmpty()){
+			BufferedImage copy = copyBuffer(buffer);
+			redo.push(copy);
+			buffer = undo.pop();
+			repaint();
+		}
+	}
+	
+	public void redo(){
+		if(!redo.isEmpty()){
+			BufferedImage copy = copyBuffer(buffer);
+			undo.push(copy);
 			buffer = redo.pop();
+			repaint();
+			
 		}
-		repaint();
 	}
-
+	
+	public PaintProperties getProperties(){
+		return this.properties;
+	}
 }
