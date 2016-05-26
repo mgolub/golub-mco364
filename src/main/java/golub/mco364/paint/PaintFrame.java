@@ -3,11 +3,9 @@ package golub.mco364.paint;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -19,156 +17,127 @@ import javax.swing.colorchooser.ColorSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class PaintFrame extends JFrame {
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 
-	private JButton clear;
+public class PaintFrame extends JFrame implements ActionListener {
+
+	private static final long serialVersionUID = 1L;
+
 	private JButton undo;
 	private JButton redo;
-	private JColorChooser chooser;
+	private JPanel buttons;
+	private ToolButton[] tools;
 	private PaintProperties properties;
-	private BufferedImage buffer;
-	private Color color;
+	private final Canvas canvas;
 
-	private Tool tool;
-	private Canvas canvas;
-
-	public PaintFrame() {
-		setTitle("PaintFrame");
+	@Inject
+	public PaintFrame(PaintProperties properties) {
+		setTitle("Paint Frame");
 		setSize(800, 600);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setResizable(false);
-		setLocationRelativeTo(null);
 
 		Container container = getContentPane();
 		container.setLayout(new BorderLayout());
+		this.properties = properties;
+		// creating a paintframe will create the whole application, using guice
+		canvas = new Canvas(properties);
+		setUndoRedo();
+		buttons = new JPanel();
 
-		JPanel buttonPanel = new JPanel();
-		JPanel colorPanel = new JPanel();
-
-		this.buffer = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB);
-
-		properties = new PaintProperties(800, 800, buffer);
-		
-		color = properties.getColor();
-		canvas = new Canvas(buffer);
-		canvas.setBackground(Color.WHITE);
-
-		buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 1, 1));
-		buttonPanel.setBackground(Color.WHITE);
-		
-		colorPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 1, 1));
-		colorPanel.setBackground(Color.WHITE);
-
-		container.add(buttonPanel, BorderLayout.NORTH);
-
-		ToolButton buttons[] = new ToolButton[] {
-				new ToolButton(new PencilTool(properties), "/pencil.jpg"),
-				new ToolButton(new RectangleTool(properties), "/square.png"),
+		tools = new ToolButton[] { new ToolButton(new PencilTool(properties), "/pencil.jpg"),
+				new ToolButton(new LineTool(properties), "/line.jpg"),
+				new ToolButton(new RectangleTool(properties), "/rectangle.jpg"),
 				new ToolButton(new OvalTool(properties), "/oval.jpg"),
-				new ToolButton(new LineTool(properties), "/line.png"),
-				new ToolButton(new BucketTool(properties), "/bucket.png")};
+				new ToolButton(new BucketTool(properties), "/bucket.png") };
 
-		Dimension d = new Dimension(40,40);
-		undo = new JButton(new ImageIcon(getClass().getResource("/undo.png")));
-		undo.setPreferredSize(d);
+		tools[0].addActionListener(this);
+		tools[1].addActionListener(this);
+		tools[2].addActionListener(this);
+		tools[3].addActionListener(this);
+		tools[4].addActionListener(this);
 
-		redo = new JButton(new ImageIcon(getClass().getResource("/redo.jpg")));
-		redo.setPreferredSize(d);
+		undo.addActionListener(this);
+		redo.addActionListener(this);
 
-		undo.setBackground(Color.WHITE);
-		redo.setBackground(Color.WHITE);
+		buttons.add(tools[0]);
+		buttons.add(tools[1]);
+		buttons.add(tools[2]);
+		buttons.add(tools[3]);
+		buttons.add(tools[4]);
+		buttons.add(undo);
+		buttons.add(redo);
 
-		
-		
+		JColorChooser cc = new JColorChooser();
 
-		chooser = new JColorChooser(Color.BLACK);
-		AbstractColorChooserPanel[] panels = chooser.getChooserPanels();
+		AbstractColorChooserPanel[] panels = cc.getChooserPanels();
 
-		chooser.setPreviewPanel(new JPanel());
-		for (AbstractColorChooserPanel accp : panels) {
-			if (!accp.getDisplayName().equals("Swatches")) {
-				chooser.removeChooserPanel(accp);
+		for (AbstractColorChooserPanel p : panels) {
+			if (!p.getDisplayName().equals("Swatches")) {
+				cc.removeChooserPanel(p);
 			}
 		}
-
-		ColorSelectionModel model = chooser.getSelectionModel();
+		cc.setPreviewPanel(new JPanel());
+		final ColorSelectionModel model = cc.getSelectionModel();
 		ChangeListener changeListener = new ChangeListener() {
-
-			public void stateChanged(ChangeEvent changeEvent) {
-				// TODO Auto-generated method stub
-				Color color = chooser.getColor();
-				properties.setColor(color);
-
+			public void stateChanged(ChangeEvent c) {
+				setColor(model.getSelectedColor());
 			}
 		};
-
 		model.addChangeListener(changeListener);
-		
-		buttonPanel.add(colorPanel);
 
-		colorPanel.add(chooser);
+		setColor(Color.BLACK);
 
-		colorPanel.add(undo);
-		colorPanel.add(redo);
+		container.add(canvas, BorderLayout.CENTER);
+		container.add(buttons, BorderLayout.NORTH);
+		container.add(cc, BorderLayout.SOUTH);
+	}
 
-		color = chooser.getSelectionModel().getSelectedColor();
+	public void setColor(Color color) {
+		properties.setColor(color);
+	}
 
-		this.tool = new PencilTool(properties); // default
+	private void setUndoRedo() {
+		undo = new JButton();
+		redo = new JButton();
+		undo.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/undo.jpg")).getImage().getScaledInstance(70,
+				70, Image.SCALE_SMOOTH)));
+		undo.setBackground(Color.white);
+		redo.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/redo.jpg")).getImage().getScaledInstance(70,
+				70, Image.SCALE_SMOOTH)));
+		redo.setBackground(Color.white);
+	}
 
-		clear = new JButton("Clear Canvas!");
-
-		container.add(clear, BorderLayout.SOUTH);
-
-		add(canvas, BorderLayout.CENTER);
-
-		ActionListener listener = new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				ToolButton button = (ToolButton) e.getSource();
-				tool = button.getTool();
-				canvas.setTool(tool);
-
-			}
-
-		};
-
-		for (ToolButton button : buttons) {
-			buttonPanel.add(button);
-			button.addActionListener(listener);
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == tools[0]) { // pencil
+			canvas.setTool(new PencilTool(properties));
 		}
-
-		undo.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent arg0) {
-				canvas.undo();
-			}
-
-		});
-
-		redo.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent arg0) {
-				canvas.redo();
-			}
-
-		});
-		
-		clear.addActionListener(new ActionListener(){
-
-			public void actionPerformed(ActionEvent arg0) {
-				
-				dispose();
-				new PaintFrame().setVisible(true);
-			}
-			
-			
-			
-		});
-
-		setVisible(true);
+		if (e.getSource() == tools[1]) { // line
+			canvas.setTool(new LineTool(properties));
+		}
+		if (e.getSource() == tools[2]) { // rectangle
+			canvas.setTool(new RectangleTool(properties));
+		}
+		if (e.getSource() == tools[3]) { // oval
+			canvas.setTool(new OvalTool(properties));
+		}
+		if (e.getSource() == tools[4]) { // bucket
+			canvas.setTool(new BucketTool(properties));
+		}
+		if (e.getSource() == undo) {
+			canvas.undo();
+		}
+		if (e.getSource() == redo) {
+			canvas.redo();
+		}
 	}
 
 	public static void main(String[] args) {
-		new PaintFrame();
+		Injector injector = Guice.createInjector(new PaintModule());
+		PaintProperties properties = injector.getInstance(PaintProperties.class);
+
+		PaintFrame frame = injector.getInstance(PaintFrame.class);
+		frame.setVisible(true);
 	}
 }

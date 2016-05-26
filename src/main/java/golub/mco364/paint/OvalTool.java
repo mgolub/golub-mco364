@@ -1,49 +1,71 @@
 package golub.mco364.paint;
 
-import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.image.BufferedImage;
 
 public class OvalTool extends Tool {
-
-	private int x1, y1;
-	private int x2, y2;
-	private int width, height;
-
+	private int x1;
+	private int y1;
+	private int x2;
+	private int y2;
 
 	public OvalTool(PaintProperties properties) {
 		super(properties);
 	}
 
+	@Override
 	public void mousePressed(Graphics g, int x, int y) {
-		x1 = x;
-		y1 = y;
-		x2 = x;
-		y2 = y;
-		width = 0;
-		height = 0;
+		this.x1 = x;
+		this.y1 = y;
+		this.x2 = x;
+		this.y2 = y;
+
 	}
 
+	@Override
 	public void mouseReleased(Graphics g, int x, int y) {
-		x2 = x;
-		y2 = y;
-		width = Math.abs(x2 - x1);
-		height = Math.abs(y2 - y1);
 		g.setColor(properties.getColor());
-		g.drawOval(x1, y1, width, height);
-
+		if (x1 > x2 && y1 > y2) {
+			// Q2
+			g.drawOval(x2, y2, x1 - x2, y1 - y2);
+		}
+		if (x2 > x1 && y1 > y2) {
+			// Q1
+			g.drawOval(x1, y2, x2 - x1, y1 - y2);
+		}
+		if (x1 > x2 && y2 > y1) {
+			// Q3
+			g.drawOval(x2, y1, x1 - x2, y2 - y1);
+		}
+		if (x2 > x1 && y2 > y1) {
+			// Q4
+			g.drawOval(x1, y1, x2 - x1, y2 - y1);
+		}
 	}
 
+	@Override
 	public void mouseDragged(Graphics g, int x, int y) {
-		x2 = x;
-		y2 = y;
-		width = Math.abs(x2 - x1);
-		height = Math.abs(y2 - y1);
+		this.x2 = x;
+		this.y2 = y;
 	}
 
+	@Override
 	public void drawPreview(Graphics g) {
 		g.setColor(properties.getColor());
-		g.drawOval(x1, y1, width, height);
+		if (x1 > x2 && y1 > y2) {
+			// Q2
+			g.drawOval(x2, y2, x1 - x2, y1 - y2);
+		}
+		if (x2 > x1 && y1 > y2) {
+			// Q1
+			g.drawOval(x1, y2, x2 - x1, y1 - y2);
+		}
+		if (x1 > x2 && y2 > y1) {
+			// Q3
+			g.drawOval(x2, y1, x1 - x2, y2 - y1);
+		}
+		if (x2 > x1 && y2 > y1) {
+			// Q4
+			g.drawOval(x1, y1, x2 - x1, y2 - y1);
+		}
 	}
-
 }

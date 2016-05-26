@@ -1,13 +1,14 @@
 package golub.mco364.paint;
 
 import java.awt.Graphics;
-import java.awt.image.BufferedImage;
 
 public abstract class Tool {
-	
+
 	protected PaintProperties properties;
-	
-	public Tool(PaintProperties properties){
+
+	//passing in PaintProperties to classes that depend on it is called dependency injection
+	//the tool class depends on paint properties
+	public Tool(PaintProperties properties) {
 		this.properties = properties;
 	}
 
