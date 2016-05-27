@@ -71,6 +71,10 @@ public class Board {
 		return available;
 	}
 
+	public void setActivePlayer(Piece activePlayer) {
+		this.activePlayer = activePlayer;
+	}
+
 	public void set(int index, Piece piece) {
 		array[index] = piece;
 		counter++;
